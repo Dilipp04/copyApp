@@ -4,7 +4,7 @@ const fs = require("fs");
 const PORT = 3000;
 
 app.get("/", (req, res) => {
-  fs.readFile("example.py", "utf8", (err, data) => {
+  fs.readFile("example.txt", "utf8", (err, data) => {
     if (err) {
       return res.status(500).send("Error reading code file");
     }
