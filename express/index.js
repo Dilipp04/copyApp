@@ -585,7 +585,7 @@ print(f"Distributive law test for a={a}, b={b}, c={c}: {distributive_law(a, b, c
 
 // Route that returns JSON data
 app.get("/", (req, res) => {
-  res.json(data.data);
+  res.json(data);
 });
 
 app.listen(PORT, () => {
