@@ -584,6 +584,9 @@ print(f"Distributive law test for a={a}, b={b}, c={c}: {distributive_law(a, b, c
 };
 
 // Route that returns JSON data
+app.get("/", (req, res) => {
+  res.json(data);
+});
 app.get("/:pno", (req, res) => {
   res.json(data[req.params.pno]);
 });
