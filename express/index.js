@@ -37,7 +37,7 @@ print(bfs('A'))`,
 
 // Route that returns JSON data
 app.get("/", (req, res) => {
-  res.json();
+  res.json(data);
 });
 
 app.listen(PORT, () => {
