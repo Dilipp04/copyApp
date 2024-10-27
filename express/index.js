@@ -748,35 +748,67 @@ namespace practical12
         }
     }
 }`,
-  13: `1. Implement custom exception handling in a web application.(8b)
-
-2. Build a program that stores user data (e.g., ID, Name, Contact Information) in a database and retrieves it to display in tabular form on a webpage.(6a)
-
-3. Create a user control for the footer (e.g., displaying a message like "All rights reserved") and integrate it into a web form.(4c)
-
-4. Show how to rotate through multiple ads using an advertisement control in a web form and demonstrate filtering ads based on specific keywords.(4b)
-
-5. Demonstrate the concepts of boxing and unboxing by creating a simple application.(2a)
-
-6. Design a webpage with interactive controls, where:
-Changing radio button selections alters the font properties of the label text.
-Selecting an option from the dropdown displays relevant information (e.g., code) in the text box.(3a)
-
-7. Create an application that:
-Generates a number sequence (e.g., Fibonacci).
-Determines if a given number is prime.(1c)
-
-8. Design a solution that retrieves records from a table using disconnected data access, displaying the results in a grid view.(6b)
-
-9. Use basic web controls (e.g., text box, label) to demonstrate exception handling for common errors like divide by zero and index out of range.(8b)
-
-10. Develop a webpage that uses tree and list views to present structured information, such as navigation or hierarchical data.(5a)
-
-11. Use a master page to maintain consistent layout elements (e.g., headers, footers) across multiple content pages, with each content page displaying unique information.(5b)
-
-12. Create a session-based system to store objects (e.g., furniture details) and display them in a list. Implement a button to retrieve and show more information about a selected item in a label.(7a)
-
-`,
+  13: [
+    {
+      qno: "1",
+      question: "Implement custom exception handling in a web application.",
+    },
+    {
+      qno: "2",
+      question:
+        "Build a program that stores user data (e.g., ID, Name, Contact Information) in a database and retrieves it to display in tabular form on a webpage.",
+    },
+    {
+      qno: "3",
+      question:
+        "Create a user control for the footer (e.g., displaying a message like 'All rights reserved') and integrate it into a web form.",
+    },
+    {
+      qno: "4",
+      question:
+        "Show how to rotate through multiple ads using an advertisement control in a web form and demonstrate filtering ads based on specific keywords.",
+    },
+    {
+      qno: "5",
+      question:
+        "Demonstrate the concepts of boxing and unboxing by creating a simple application.",
+    },
+    {
+      qno: "6",
+      question:
+        "Design a webpage with interactive controls, where changing radio button selections alters the font properties of the label text. Selecting an option from the dropdown displays relevant information (e.g., code) in the text box.",
+    },
+    {
+      qno: "7",
+      question:
+        "Create an application that generates a number sequence (e.g., Fibonacci) and determines if a given number is prime.",
+    },
+    {
+      qno: "8",
+      question:
+        "Design a solution that retrieves records from a table using disconnected data access, displaying the results in a grid view.",
+    },
+    {
+      qno: "9",
+      question:
+        "Use basic web controls (e.g., text box, label) to demonstrate exception handling for common errors like divide by zero and index out of range.",
+    },
+    {
+      qno: "10",
+      question:
+        "Develop a webpage that uses tree and list views to present structured information, such as navigation or hierarchical data.",
+    },
+    {
+      qno: "11",
+      question:
+        "Use a master page to maintain consistent layout elements (e.g., headers, footers) across multiple content pages, with each content page displaying unique information.",
+    },
+    {
+      qno: "12",
+      question:
+        "Create a session-based system to store objects (e.g., furniture details) and display them in a list. Implement a button to retrieve and show more information about a selected item in a label.",
+    },
+  ],
 };
 
 // Route that returns JSON data
