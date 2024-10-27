@@ -748,6 +748,35 @@ namespace practical12
         }
     }
 }`,
+  13: `1. Implement custom exception handling in a web application.(8b)
+
+2. Build a program that stores user data (e.g., ID, Name, Contact Information) in a database and retrieves it to display in tabular form on a webpage.(6a)
+
+3. Create a user control for the footer (e.g., displaying a message like "All rights reserved") and integrate it into a web form.(4c)
+
+4. Show how to rotate through multiple ads using an advertisement control in a web form and demonstrate filtering ads based on specific keywords.(4b)
+
+5. Demonstrate the concepts of boxing and unboxing by creating a simple application.(2a)
+
+6. Design a webpage with interactive controls, where:
+Changing radio button selections alters the font properties of the label text.
+Selecting an option from the dropdown displays relevant information (e.g., code) in the text box.(3a)
+
+7. Create an application that:
+Generates a number sequence (e.g., Fibonacci).
+Determines if a given number is prime.(1c)
+
+8. Design a solution that retrieves records from a table using disconnected data access, displaying the results in a grid view.(6b)
+
+9. Use basic web controls (e.g., text box, label) to demonstrate exception handling for common errors like divide by zero and index out of range.(8b)
+
+10. Develop a webpage that uses tree and list views to present structured information, such as navigation or hierarchical data.(5a)
+
+11. Use a master page to maintain consistent layout elements (e.g., headers, footers) across multiple content pages, with each content page displaying unique information.(5b)
+
+12. Create a session-based system to store objects (e.g., furniture details) and display them in a list. Implement a button to retrieve and show more information about a selected item in a label.(7a)
+
+`,
 };
 
 // Route that returns JSON data
