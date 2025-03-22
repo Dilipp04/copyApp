@@ -91,9 +91,11 @@ PC> ssh –1 SSHadmin 192.168.3.1
 
 // Route that returns JSON data
 app.get("/", (req, res) => {
+  res.type("text/plain");
   res.json(data);
 });
 app.get("/:pno", (req, res) => {
+  res.type("text/plain");
   res.json(data[req.params.pno]);
 });
 
