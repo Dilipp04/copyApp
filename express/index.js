@@ -17,6 +17,17 @@ let data = {
   1: `
 Practical1: Configure Cisco Routers for OSPF & MD5, NTP, Syslog, and SSH
 
+DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULT GATEWAY
+R1 Gig0/0 192.168.1.1 255.255.255.0 -
+S0/1/0 10.1.1.1 255.255.255.252 -
+R2 S0/1/0 10.1.1.2 255.255.255.252 -
+S0/1/1 10.2.2.2 255.255.255.252 -
+R3 S0/1/0 10.2.2.1 255.255.255.252 -
+Gig0/0 192.168.3.1 255.255.255.0 -
+SERVER-0 - 192.168.1.5 255.255.255.0 192.168.1.1
+SERVER-1 - 192.168.1.6 255.255.255.0 192.168.1.1
+PC-PT - 192.168.3.5 255.255.255.0 192.168.1.3
+
 1/A  Step2: OSPF
 Router  cli config      
 Router 1:
@@ -80,6 +91,21 @@ PC> ssh –1 SSHadmin 192.168.3.1
   2: `
 Practical 2: Configure AAA Authentication on Cisco Routers
 
+DEVICE INTERFACE IP ADDRESS SUBNET MASK
+DEFAULT
+GATEWAY
+R1 Gig0/0 192.168.1.1 255.255.255.0 -
+S0/1/0 10.1.1.2 255.255.255.252 -
+R2 Gig0/0 192.168.2.1 255.255.255.0 -
+S0/1/0 10.1.1.1 255.255.255.252 -
+S0/1/1 10.2.2.1 255.255.255.252 -
+R3 Gig0/0 192.168.3.1 255.255.255.0 -
+S0/1/0 10.2.2.2 255.255.255.252 -
+PC0 - 192.168.1.3 255.255.255.0 192.168.1.1
+PC1 - 192.168.2.3 255.255.255.0 192.168.2.1
+PC2 - 192.168.3.3 255.255.255.0 192.168.3.1
+SERVER-0 - 192.168.3.2 255.255.255.0 192.168.3.1
+
 Configure and do rip:
 
 Part-1: Authentication 
@@ -112,6 +138,17 @@ PC> ssh –1 SSHadmin (address)
   3: `
 Practical 3: Configuring Extended Access Control Lists (ACLs)
 
+DEVICE INTERFACE IP ADDRESS SUBNET MASK DEFAULT GATEWAY
+Gig0/0 172.22.34.61 255.255.255.192 -
+R1 Gig0/1 172.22.34.65 255.255.255.224 -
+Gig0/2 172.22.34.97 255.255.255.240 -
+SERVER-0
+- 172.22.34.62 255.255.255.192 172.22.34.61
+PC0
+- 172.22.34.66 255.255.255.224 172.22.34.65
+PC1
+- 172.22.34.98 255.255.255.240 172.22.34.97
+
 Do the connection as given and rip
 (FTP from PC1 to Server  and Web from PC2 to Server)
 
@@ -132,7 +169,87 @@ R1(config-if)# ip access-group HTTP_ONLY in
 Check:   pc2dekstopbrowersaddress of server and enter
 
 `,
-  4: ``,
+  4: `
+  
+  
+DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULTGATEWAY
+R1 Gig0/0 192.168.1.1 255.255.255.0 -
+S0/1/0 10.1.1.1 255.255.255.252 -
+R2 S0/1/0 10.1.1.2 255.255.255.252 -
+S0/1/1 10.2.2.2 255.255.255.252 -
+R3 Gig0/0 192.168.3.1 255.255.255.0 -
+S0/1/0 10.2.2.1 255.255.255.252 -
+SERVER-0 - 192.168.1.3 255.255.255.0 192.168.1.1
+PC-0 - 192.168.3.3 255.255.255.1 192.168.3.1
+
+
+Part-1: SSH enabling and checking
+do ssh config in all routers
+
+Router#config t
+Router(config)#ip domain-name ccnasecurity.com
+Router(config)#username SSHadmin privilege 15 secret ciscosshpa55
+Router(config)#line vty 0 4
+Router(config-line)#login local
+Router(config-line)#transport input ssh
+Router(config-line)#exit
+Router(config)#hostname R2
+R2(config)#crypto key generate rsa
+How many bits in the modulus [512]: 1024
+R2(config)#ip ssh authentication-retries 2
+R2(config)#ip ssh version 2
+
+check ssh in pc 
+ssh -l SSHadmin 192.168... (router address)
+
+Part-2 : Block all remote access to router except PC-C
+
+R1>
+R1>en
+R1#config t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#access-list 10 permit host 192.168.3.3
+R1(config)#access-list 10 deny any
+R1(config)#line vty 0 4
+R1(config-line)#access-class 10 in
+R1(config-line)#
+
+Part-3.1 : IP ACL 120 to permit any to access DNS, SMTP and FTP on Server
+
+R1#config t
+Enter configuration commands, one per line.  End with CNTL/Z.
+R1(config)#access-list 120 permit udp any host 192.168.1.3 eq domain
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq smtp
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq ftp
+R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq 443
+R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq 22
+R1(config)#interface s0/1/0
+R1(config-if)#ip access-group 120 in
+
+Part 3: 3.2] Deny access to HTTPS on PC-A
+
+R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq 443
+
+Part 3.3 Permit PC-C to access R3 via SSH
+
+R3#config t
+R3(config)#access-list 110 permit ip 192.168.3.0 0.0.0.255 any
+R3(config)#int g0/0
+R3(config-if)#ip access-group 110 in
+R3(config-if)#access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host 192.168.3.3
+R3(config)#access-list 100 deny ip 10.0.0.0 0.255.255.255 any
+R3(config)#access-list 100 deny ip 172.16.0.0 0.15.255.255 any
+R3(config)#access-list 100 deny ip 192.168.0.0 0.0.255.255 any
+R3(config)#access-list 100 deny ip 127.0.0.0 0.0.255.255 any
+R3(config)#access-list 100 deny ip 224.0.0.0 15.255.255.255 any
+R3(config)#access-list 100 deny ip any any
+R3(config)#int s0/1/0	
+R3(config-if)#ip access-group 100 in
+
+
+
+  
+  `,
   5: `
 Practical 5: Configuring IPv6 ACLs
 
@@ -205,6 +322,20 @@ Pc0: ping server address
   6: `
 Practical-6 Configuring a Zone-Based Policy Firewall (ZPF)
 
+DEVICE INTERFACE
+IP
+ADDRESS SUBNET MASK
+DEFAULT
+GATEWAY
+R1 Gig0/0 192.168.1.1 255.255.255.0 -
+S0/1/0 10.1.1.1 255.255.255.252 -
+R2 S0/1/0 10.1.1.2 255.255.255.252 -
+S0/1/1 10.2.2.2 255.255.255.252 -
+R3 Gig0/0 192.168.3.1 255.255.255.0 -
+S0/1/0 10.2.2.1 255.255.255.252 -
+SERVER-0 - 192.168.3.3 255.255.255.0 192.168.3.1
+PC0 - 192.168.1.3 255.255.255.0 192.168.1.1
+
 1st configure and apply rip and see conections:
 Go to Router 3:
 (SSH connection first)
@@ -262,6 +393,17 @@ ping 192.168.1.3
   7: `
 Practical 7: : Configure Intrusion Prevention System (IPS), using the CLI
 
+DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULTGATEWAY
+R1 Gig0/0 192.168.1.1 255.255.255.0 -
+S0/1/0 10.1.1.1 255.255.255.252 -
+R2 S0/1/0 10.1.1.2 255.255.255.252 -
+S0/1/1 10.2.2.2 255.255.255.252 -
+R3 Gig0/0 192.168.3.1 255.255.255.0 -
+S0/1/0 10.2.2.1 255.255.255.252 -
+SERVER-0 - 192.168.1.3 255.255.255.0 192.168.1.1
+PC0 - 192.168.1.2 255.255.255.0 192.168.1.1
+PC1 - 192.168.3.2 255.255.255.1 192.168.3.1
+
 1st configure and do rip;
 
 Router(config)#license boot module c1900 technology-package securityk9
@@ -317,7 +459,78 @@ PC-1 will ping PC-2 , but PC-2 will not be able to ping PC-1
 i.e  ping (address of pc where to send)
 
 `,
-  8: ``,
+  8: `
+Do connection and give any address to it
+1)	SW-A and Sw-1 with 23
+2)	SW-B and Sw-2 with 23
+3)	Sw-1 and Sw-B with 24
+4)	Sw-2 and Sw-A with 24
+(not necessary just rememeber the port if its diff)
+
+Central : (make it primary)
+central#conf t
+central(config)#spanning-tree vlan 1 root primary 
+central(config)#ex
+central#show spanning-tree
+
+SW-A:   (write same in SW-B)
+Sw-A>en
+Sw-A#conf t
+
+Sw-A(config)#interface range fastEthernet 0/1-4  
+(ports connected to pcs)
+
+Sw-A(config-if-range)#spanning-tree portfast
+Sw-A(config-if-range)#spanning-tree bpduguard enable
+Sw-A(config-if-range)#ex
+
+Sw-A(config)#interface range fastEthernet 0/1-22
+(ports except 23&24)
+
+Sw-A(config-if-range)#switchport mode access 
+Sw-A(config-if-range)#switchport port-security 
+Sw-A(config-if-range)#switchport port-security maximum 2
+Sw-A(config-if-range)#switchport port-security violation shutdown 
+Sw-A(config-if-range)#switchport port-security mac-address sticky 
+Sw-A(config-if-range)#ex
+
+(useless ports)
+Sw-A(config)#interface range fastEthernet 0/5-22
+Sw-A(config-if-range)#shutdown
+
+SW-1 :
+Sw-1>en
+Sw-1#conf t
+Sw-1(config)#spanning-tree vlan 1 root secondary 
+Sw-1(config)#interface range fastEthernet 0/23-24
+Sw-1(config-if-range)#spanning-tree guard root
+
+SW-2:
+Sw-1>en
+Sw-1#conf t
+Sw-1(config)#interface range fastEthernet 0/23-24
+Sw-1(config-if-range)#spanning-tree guard root
+
+Result check:
+Sw-B#show port-security interface fastEthernet 0/1
+(whichever port connected to pc or switch)
+`,
+  9: `
+
+enable secret enpa55
+line console 0
+password conpa55
+login
+exit
+ip domain-name ccnasecurity.com
+username admin secret adminpa55
+line vty 0 4
+login local
+exit
+crypto key generate rsa
+1024
+
+`,
 };
 
 // Route that returns JSON data
