@@ -4,533 +4,99 @@ const PORT = 3000;
 app.use(express.json());
 
 let data = {
-  0: `
-  1: Configure Cisco Routers for OSPF & MD5, NTP, Syslog, and SSH
-  2: Configure AAA Authentication on Cisco Routers
-  3: Configuring Extended Access Control Lists (ACLs)
-  4: Configure IP ACLs to Mitigate Attacks.
-  5: Configuring IPv6 ACLs
-  6 Configuring a Zone-Based Policy Firewall (ZPF)
-  7:  Configure Intrusion Prevention System (IPS), using the CLI
-  8: Packet Tracer - Layer 2 Security
-`,
-  1: `
-Practical1: Configure Cisco Routers for OSPF & MD5, NTP, Syslog, and SSH
-
-DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULT GATEWAY
-R1 Gig0/0 192.168.1.1 255.255.255.0 -
-S0/1/0 10.1.1.1 255.255.255.252 -
-R2 S0/1/0 10.1.1.2 255.255.255.252 -
-S0/1/1 10.2.2.2 255.255.255.252 -
-R3 S0/1/0 10.2.2.1 255.255.255.252 -
-Gig0/0 192.168.3.1 255.255.255.0 -
-SERVER-0 - 192.168.1.5 255.255.255.0 192.168.1.1
-SERVER-1 - 192.168.1.6 255.255.255.0 192.168.1.1
-PC-PT - 192.168.3.5 255.255.255.0 192.168.1.3
-
-1/A  Step2: OSPF
-Router  cli config      
-Router 1:
-Router(config)#router ospf 1    
-Router(config-router)#network 192.168.1.0 0.0.0.255 area 0
-Router(config-router)#network 10.1.1.0 0.0.0.3 area 0
-Router(config-router)#area 0 authentication message-digest          exit
-Router(config-if)#interface Serial0/1/0
-Router(config-if)#ip ospf message-digest-key 1 md5 MD5pa55     
-Router 2:
-Router(config)#router ospf 2
-Router(config-router)#network 10.1.1.0 0.0.0.3 area 0
-Router(config-router)#network 10.2.2.0 0.0.0.3 area 0
-Router(config-router)#area 0 authentication message-digest
-Router(config-if)#interface Serial0/1/0
-Router(config-if)#ip ospf message-digest-key 1 md5 MD5pa55
-Router(config-if)#interface Serial0/1/0
-Router(config-if)#ip ospf message-digest-key 1 md5 MD5pa55
-Router 3:
-Router(config)#router ospf 3
-Router(config-router)#network 192.168.3.0 0.0.0.255 area 0
-Router(config-router)#network 10.2.2.0 0.0.0.3 area 0
-Router(config-router)#area 0 authentication message-digest
-Router(config-if)#interface Serial0/1/0
-Router(config-if)#ip ospf message-digest-key 1 md5 MD5pa55
-Check:  Router# show ip ospf interface
-
-1/B  NTP (network time Protocole)
-Server 1service NTPon give key1 and password NTPpa55
-Router(config)#ntp server 192.168.1.5
-Router(config)#ntp update-calendar
-Router(config)#ntp authenticate
-Router(config)#ntp trusted-key 1
-Router(config)#ntp authentication-key 1 md5 NTPpa55
-Router(config)#service timestamps log datetime msec
-(Same for all three router)
-
-1/C  SYSlog
-R1(config)# logging host 192.168.1.6
-Same in all three and then exit
-Server2servicesyslogdata will appear
-
-1/D   SSH
-R2(config)#ip domain-name ccnasecurity.com
-R2(config)#username SSHadmin privilege 15 secret ciscosshpa55
-R2(config)#line vty 0 4
-R2(config-line)# login local
-R2(config-line)# transport input ssh
-R2(config)#crypto key zeroize rsa
-R2(config)#crypto key generate rsa
-How many bits in the modulus [512]: 1024
-R2(config)#ex
-R2#show ip ssh
-R2#conf t
-R2(config)#ip ssh time-out 90
-R2(config)#ip ssh authentication-retries 2
-R2(config)#ip ssh version 2
-Check:
-PC> ssh –1 SSHadmin 192.168.3.1
-`,
-  2: `
-Practical 2: Configure AAA Authentication on Cisco Routers
-
-DEVICE INTERFACE IP ADDRESS SUBNET MASK
-DEFAULT
-GATEWAY
-R1 Gig0/0 192.168.1.1 255.255.255.0 -
-S0/1/0 10.1.1.2 255.255.255.252 -
-R2 Gig0/0 192.168.2.1 255.255.255.0 -
-S0/1/0 10.1.1.1 255.255.255.252 -
-S0/1/1 10.2.2.1 255.255.255.252 -
-R3 Gig0/0 192.168.3.1 255.255.255.0 -
-S0/1/0 10.2.2.2 255.255.255.252 -
-PC0 - 192.168.1.3 255.255.255.0 192.168.1.1
-PC1 - 192.168.2.3 255.255.255.0 192.168.2.1
-PC2 - 192.168.3.3 255.255.255.0 192.168.3.1
-SERVER-0 - 192.168.3.2 255.255.255.0 192.168.3.1
-
-Configure and do rip:
-
-Part-1: Authentication 
-
-R1(config)#username admin1 secret admin1pa55
-R1(config)#aaa new-model
-R1(config)#aaa authentication login default local
-R1(config)#line console 0
-R1(config-line)#login authentication default
-R1(config-line)#exit
-
-Part 2: Authorization 
-
-R1(config)#ip domain-name ccnasecurity.com
-R1(config)#username SSHadmin privilege 15 secret ciscosshpa55
-R1(config)#line vty 0 4
-R1(config-line)#transport input ssh
-R1(config-line)#exit
-R1(config)#crypto key zeroize rsa
-R1(config)#crypto key generate rsa
-How many bits in the modulus [512]: 1024
-R1(config)#ip ssh time-out 90
-R1(config)#ip ssh authentication-retries 2
-R1(config)#ip ssh version 2
-
-Check:
-PC> ssh –1 SSHadmin (address)
-
-`,
+  1: ``,
+  2: ``,
   3: `
-Practical 3: Configuring Extended Access Control Lists (ACLs)
-
-DEVICE INTERFACE IP ADDRESS SUBNET MASK DEFAULT GATEWAY
-Gig0/0 172.22.34.61 255.255.255.192 -
-R1 Gig0/1 172.22.34.65 255.255.255.224 -
-Gig0/2 172.22.34.97 255.255.255.240 -
-SERVER-0
-- 172.22.34.62 255.255.255.192 172.22.34.61
-PC0
-- 172.22.34.66 255.255.255.224 172.22.34.65
-PC1
-- 172.22.34.98 255.255.255.240 172.22.34.97
-
-Do the connection as given and rip
-(FTP from PC1 to Server  and Web from PC2 to Server)
-
- FTP from PC1 to Server  
-R1(config)#access-list 100 permit tcp 172.22.34.64 0.0.0.31 host 172.22.34.62 eq ftp
-R1(config)#access-list 100 permit icmp 172.22.34.64 0.0.0.31 host 172.22.34.62 
-R1(config)#interface gigabitEthernet 0/1                   -> pc1 which have to give ftp
-R1(config-if)# ip access-group 100 in
-Check: PC> ftp 172.22.34.62                   ->server address
-
-Web from PC2 to Server:
-R1(config)#ip access-list extended HTTP_ONLY
-R1(config-ext-nacl)#permit tcp 172.22.34.96 0.0.0.15 host 172.22.34.62 eq www
-R1(config-ext-nacl)#permit icmp 172.22.34.96 0.0.0.15 host 172.22.34.62 
-R1(config-ext-nacl)#en
-R1(config)# interface gigabitEthernet 0/2
-R1(config-if)# ip access-group HTTP_ONLY in
-Check:   pc2dekstopbrowersaddress of server and enter
-
-`,
-  4: `
-  
-  
-DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULTGATEWAY
-R1 Gig0/0 192.168.1.1 255.255.255.0 -
-S0/1/0 10.1.1.1 255.255.255.252 -
-R2 S0/1/0 10.1.1.2 255.255.255.252 -
-S0/1/1 10.2.2.2 255.255.255.252 -
-R3 Gig0/0 192.168.3.1 255.255.255.0 -
-S0/1/0 10.2.2.1 255.255.255.252 -
-SERVER-0 - 192.168.1.3 255.255.255.0 192.168.1.1
-PC-0 - 192.168.3.3 255.255.255.1 192.168.3.1
-
-
-Part-1: SSH enabling and checking
-do ssh config in all routers
-
-Router#config t
-Router(config)#ip domain-name ccnasecurity.com
-Router(config)#username SSHadmin privilege 15 secret ciscosshpa55
-Router(config)#line vty 0 4
-Router(config-line)#login local
-Router(config-line)#transport input ssh
-Router(config-line)#exit
-Router(config)#hostname R2
-R2(config)#crypto key generate rsa
-How many bits in the modulus [512]: 1024
-R2(config)#ip ssh authentication-retries 2
-R2(config)#ip ssh version 2
-
-check ssh in pc 
-ssh -l SSHadmin 192.168... (router address)
-
-Part-2 : Block all remote access to router except PC-C
-
-R1>
-R1>en
-R1#config t
-Enter configuration commands, one per line.  End with CNTL/Z.
-R1(config)#access-list 10 permit host 192.168.3.3
-R1(config)#access-list 10 deny any
-R1(config)#line vty 0 4
-R1(config-line)#access-class 10 in
-R1(config-line)#
-
-Part-3.1 : IP ACL 120 to permit any to access DNS, SMTP and FTP on Server
-
-R1#config t
-Enter configuration commands, one per line.  End with CNTL/Z.
-R1(config)#access-list 120 permit udp any host 192.168.1.3 eq domain
-R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq smtp
-R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq ftp
-R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq 443
-R1(config)#access-list 120 permit tcp any host 192.168.1.3 eq 22
-R1(config)#interface s0/1/0
-R1(config-if)#ip access-group 120 in
-
-Part 3: 3.2] Deny access to HTTPS on PC-A
-
-R1(config)#access-list 120 deny tcp any host 192.168.1.3 eq 443
-
-Part 3.3 Permit PC-C to access R3 via SSH
-
-R3#config t
-R3(config)#access-list 110 permit ip 192.168.3.0 0.0.0.255 any
-R3(config)#int g0/0
-R3(config-if)#ip access-group 110 in
-R3(config-if)#access-list 100 permit tcp 10.0.0.0 0.255.255.255 eq 22 host 192.168.3.3
-R3(config)#access-list 100 deny ip 10.0.0.0 0.255.255.255 any
-R3(config)#access-list 100 deny ip 172.16.0.0 0.15.255.255 any
-R3(config)#access-list 100 deny ip 192.168.0.0 0.0.255.255 any
-R3(config)#access-list 100 deny ip 127.0.0.0 0.0.255.255 any
-R3(config)#access-list 100 deny ip 224.0.0.0 15.255.255.255 any
-R3(config)#access-list 100 deny ip any any
-R3(config)#int s0/1/0	
-R3(config-if)#ip access-group 100 in
-
-
-
+> rainfall<-c(799,1174.8,865.1,1334.6,635.4,918.5,685.5,998.6,784.2,985,882.8,1071)
+> rainfall.timeseries <- ts(rainfall,start = c(2012,1),frequency = 12)
+> print(rainfall.timeseries)
+> png(file = "rainfall.png")
+> plot(rainfall.timeseries)
+> dev.off()
   
   `,
+  4: `
+  > newiris <- iris
+> newiris$Species <- NULL
+> kc <- kmeans(newiris, 3)
+> table(iris$Species, kc$cluster)
+> plot(newiris[c("Sepal.Length", "Sepal.Width")], col = kc$cluster)
+> points(kc$centers[, c("Sepal.Length", "Sepal.Width")], col = 1:3, pch = 8, cex = 2)
+  `,
   5: `
-Practical 5: Configuring IPv6 ACLs
-
-Ipv6 configuration
-Router 0:
-(For router to router)
-Router(config)#ipv6 unicast-routing
-Router(config)#int s0/1/0
-Router(config-if)#ipv6 address 2001:DB8:1:A001::1/64
-Router(config-if)#ipv6 address FE80::1 link-local
-Router(config-if)#no shut
-
-Router 1:
-(for R to R)
-Router#config t
-Router(config)#ipv6 unicast-routing
-Router(config)#int s0/1/0
-Router(config-if)#ipv6 address 2001:DB8:1:A001::2/64
-Router(config-if)#ipv6 address FE80::1 link-local
-Router(config-if)#no shut
-Router(config-if)#exit
-
-For G0/1:
-Router(config)#ipv6 unicast-routing
-Router(config)#int G0/1
-Router(config-if)#ipv6 address 2001:DB8:1:2::1/64
-Router(config-if)#ipv6 address FE80::1 link-local
-Router(config-if)#no shut
-Router(config-if)#exit
-
-For G0/0:
-Router(config)#ipv6 unicast-routing
-Router(config)#int G0/0
-Router(config-if)#ipv6 address 2001:DB8:1:1::1/64
-Router(config-if)#ipv6 address FE80::1 link-local
-Router(config-if)#no shut
-
-Part 1: Block HTTP & HTTPS request on Server and allow ICMP
-
-Router(config)#ipv6 access-list BLOCK-HTTP
-Router(config-ipv6-acl)#deny tcp any host 2001:DB8:1:2::3 eq www
-Router(config-ipv6-acl)#deny tcp any host 2001:DB8:1:2::3 eq 443
-Router(config-ipv6-acl)#exit
-Router(config-if)#int G0/1
-Router(config-if)#ipv6 access-list BLOCK-HTTP
-Router(config-ipv6-acl)#permit ipv6 any any
-Router(config-ipv6-acl)#exit
-Router(config)#int G0/1
-Router(config-if)#ipv6 traffic-filter BLOCK-HTTP in
-Router(config-if)#exit
-
-To check :
-pc0 web  sever address
-
-Part2: Block ICMP request on Server
-
-Router(config)#ipv6 access-list BLOCK-ICMP
-Router(config-ipv6-acl)#deny icmp any any
-Router(config-ipv6-acl)#permit ipv6 any any
-Router(config-ipv6-acl)#end
-Router#config t
-Router(config)#int G0/1
-Router(config-if)#ipv6 traffic-filter BLOCK-ICMP out
-Router(config-if)#exit
-
-To check:
-Pc0: ping server address
-
-`,
+  > x <- c(151, 174, 138, 186, 128, 136, 179, 163, 152, 131)
+> y <- c(63, 81, 56, 91, 47, 57, 76, 72, 62, 48)
+> # Apply the lm() function.
+> relation <- lm(y~x)
+> print(relation)
+> print(summary(relation))
+> a <- data.frame(x = 170)
+> result <- predict(relation,a)
+> print(result)
+> png(file = "linearregression.png")
+> plot(y,x,col = "blue",main = "Height & Weight Regression",+ abline(lm(x~y)),cex =
+1.3,pch = 16,xlab = "Weight in Kg",ylab = "Height in + cm")
+> dev.off()
+  
+  `,
   6: `
-Practical-6 Configuring a Zone-Based Policy Firewall (ZPF)
-
-DEVICE INTERFACE
-IP
-ADDRESS SUBNET MASK
-DEFAULT
-GATEWAY
-R1 Gig0/0 192.168.1.1 255.255.255.0 -
-S0/1/0 10.1.1.1 255.255.255.252 -
-R2 S0/1/0 10.1.1.2 255.255.255.252 -
-S0/1/1 10.2.2.2 255.255.255.252 -
-R3 Gig0/0 192.168.3.1 255.255.255.0 -
-S0/1/0 10.2.2.1 255.255.255.252 -
-SERVER-0 - 192.168.3.3 255.255.255.0 192.168.3.1
-PC0 - 192.168.1.3 255.255.255.0 192.168.1.1
-
-1st configure and apply rip and see conections:
-Go to Router 3:
-(SSH connection first)
-R3(config)#ip domain-name ccnasecurity.com
-R3(config)#username SSHadmin privilege 15 secret ciscosshpa55
-R3(config)#line vty 0 4
-R3(config-line)# login local
-R3(config-line)# transport input ssh
-R3(config)#crypto key zeroize rsa
-R3(config)#crypto key generate rsa
-How many bits in the modulus [512]: 1024
-R3(config)#ip ssh time-out 90
-R3(config)#ip ssh authentication-retries 2
-R3(config)#ip ssh version 2
-R3(config)#license boot module c1900 technology-package securityk9
-[yes/no] : yes
-R3#copy running-config startup-config
-R3#reload
-R3#show version
-
-R3(config)#zone security IN-ZONE
-R3(config-sec-zone)#exit
-R3(config)#zone security OUT-ZONE
-R3(config-sec-zone)#exit
-R3(config)#access-list 101
-% Incomplete command.
-R3(config)#access-list 101 permit ip 192.168.3.0 0.0.0.255 any
-R3(config)#class-map type inspect match-all IN-NET-CLASS-MAP
-R3(config-cmap)#match access-group 101
-R3(config-cmap)#exit
-R3(config)#policy-map type inspect IN-2-OUT-PMAP
-R3(config-pmap)#class type inspect IN-NET-CLASS-MAP
-R3(config-pmap-c)#inspect
-%No specific protocol configured in class IN-NET-CLASS-MAP for inspection. All protocols will be inspected
-R3(config-pmap-c)#exit
-R3(config-pmap)#exit
-R3(config)#zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
-R3(config-sec-zone-pair)#service-policy type inspect IN-2-OUT-PMAP
-R3(config-sec-zone-pair)#exit
-R3(config)#int G0/1
-R3(config-if)#zone-member security IN-ZONE
-R3(config-if)#exit
-R3(config)#int s0/0/1
-R3(config-if)#zone-member security OUT-ZONE
-R3(config-if)#exit
-
-Check:
-Ping from Server to PC, will not work.
-ping 192.168.3.3
-
-Ping from PC to Server , will work.
-ping 192.168.1.3
-
-`,
+  > x <- c(151, 174, 138, 186, 128, 136, 179, 163, 152, 131)
+> y <- c(63, 81, 56, 91, 47, 57, 76, 72, 62, 48)
+> y_binary <- ifelse(y > 60, 1, 0)
+> data <- data.frame(x = x, y = y, y_binary = y_binary)
+> logistic_model <- glm(y_binary ~ x, data = data, family = binomial)
+> summary(logistic_model)
+> predicted_prob <- predict(logistic_model, type = "response")
+> predicted_class <- ifelse(predicted_prob > 0.5, 1, 0)
+> table(Predicted = predicted_class, Actual = y_binary)
+> library(ggplot2)
+> ggplot(data, aes(x = x, y = y_binary)) +
++ geom_point() +
++ stat_smooth(method = "glm", method.args = list(family = "binomial"), se = FALSE) +
++ labs(title = "Logistic Regression: Binary Outcome by x",
++ x = "x",
++ y = "Binary Outcome")
+  `,
   7: `
-Practical 7: : Configure Intrusion Prevention System (IPS), using the CLI
-
-DEVICE INTERFACE IPADDRESS SUBNETMASK DEFAULTGATEWAY
-R1 Gig0/0 192.168.1.1 255.255.255.0 -
-S0/1/0 10.1.1.1 255.255.255.252 -
-R2 S0/1/0 10.1.1.2 255.255.255.252 -
-S0/1/1 10.2.2.2 255.255.255.252 -
-R3 Gig0/0 192.168.3.1 255.255.255.0 -
-S0/1/0 10.2.2.1 255.255.255.252 -
-SERVER-0 - 192.168.1.3 255.255.255.0 192.168.1.1
-PC0 - 192.168.1.2 255.255.255.0 192.168.1.1
-PC1 - 192.168.3.2 255.255.255.1 192.168.3.1
-
-1st configure and do rip;
-
-Router(config)#license boot module c1900 technology-package securityk9
-Router#copy running-config startup-config
-Router#reload
-
-Part1 : Part 1: Enable IOS IPS
-Router>en
-Router#mkdir iosips
-Create directory filename [iosips]?
-Created dir flash:iosips
-
-Router#conf t
-Router(config)#ip ips config location flash:iosips
-Router(config)#ip ips name iosips
-Router(config)#ip ips signature-category
-Router(config-ips-category)#category all
-Router(config-ips-category-action)#retired true
-Router(config-ips-category-action)#exit
-Router(config-ips-category)#category i
-Router(config-ips-category)#category ios_ips basic
-Router(config-ips-category-action)#retired false
-Router(config-ips-category-action)#exit
-Router(config-ips-category)#exit
-
-Router(config)#int G0/0
-Router(config-if)#ip ips iosips out
-
-Part 2: Modify the Signature
-
-Router#config t
-Router(config)#ip ips notify log
-Router(config)#ex
-Router#clock set 07:10:48 22 mar 2025          -> (set clock from server->ntp on it and copy time and date)
-Router#conf t
-Router(config)#service timestamp log datetime msec
-Router(config)#logging host 192.168.1.3
-Router(config)#ip ips signature-definition 
-Router(config-sigdef)#signature 2004 0
-Router(config-sigdef-sig)#status
-Router(config-sigdef-sig-status)#retired false
-Router(config-sigdef-sig-status)#enable true
-Router(config-sigdef-sig-status)#exit
-Router(config-sigdef-sig)#engine
-Router(config-sigdef-sig-engine)#event-action produce-alert
-Router(config-sigdef-sig-engine)#event-action deny-packet-inline 
-Router(config-sigdef-sig-engine)#exit
-Router(config-sigdef-sig)#exit
-Router(config-sigdef)#exit
-
-Check:
-PC-1 will ping PC-2 , but PC-2 will not be able to ping PC-1
-i.e  ping (address of pc where to send)
-
-`,
+  !pip install pandas
+import pandas as pd
+df=pd.read_csv('AdventureWorks Sales.csv')
+df
+df.head()
+df.tail()
+df.describe()
+print(df.columns)
+print(df.shape)
+print(df.isnull())
+print(df.corr)
+df.plot()
+df.hist()
+df.boxplot()
+df.groupby('Channel').count().plot(kind='pie', y='SalesOrderLineKey', autopct='%1.1f%%',
+figsize=(6,6))
+  `,
   8: `
-Do connection and give any address to it
-1)	SW-A and Sw-1 with 23
-2)	SW-B and Sw-2 with 23
-3)	Sw-1 and Sw-B with 24
-4)	Sw-2 and Sw-A with 24
-(not necessary just rememeber the port if its diff)
-
-Central : (make it primary)
-central#conf t
-central(config)#spanning-tree vlan 1 root primary 
-central(config)#ex
-central#show spanning-tree
-
-SW-A:   (write same in SW-B)
-Sw-A>en
-Sw-A#conf t
-
-Sw-A(config)#interface range fastEthernet 0/1-4  
-(ports connected to pcs)
-
-Sw-A(config-if-range)#spanning-tree portfast
-Sw-A(config-if-range)#spanning-tree bpduguard enable
-Sw-A(config-if-range)#ex
-
-Sw-A(config)#interface range fastEthernet 0/1-22
-(ports except 23&24)
-
-Sw-A(config-if-range)#switchport mode access 
-Sw-A(config-if-range)#switchport port-security 
-Sw-A(config-if-range)#switchport port-security maximum 2
-Sw-A(config-if-range)#switchport port-security violation shutdown 
-Sw-A(config-if-range)#switchport port-security mac-address sticky 
-Sw-A(config-if-range)#ex
-
-(useless ports)
-Sw-A(config)#interface range fastEthernet 0/5-22
-Sw-A(config-if-range)#shutdown
-
-SW-1 :
-Sw-1>en
-Sw-1#conf t
-Sw-1(config)#spanning-tree vlan 1 root secondary 
-Sw-1(config)#interface range fastEthernet 0/23-24
-Sw-1(config-if-range)#spanning-tree guard root
-
-SW-2:
-Sw-1>en
-Sw-1#conf t
-Sw-1(config)#interface range fastEthernet 0/23-24
-Sw-1(config-if-range)#spanning-tree guard root
-
-Result check:
-Sw-B#show port-security interface fastEthernet 0/1
-(whichever port connected to pc or switch)
-`,
-  9: `
-
-enable secret enpa55
-line console 0
-password conpa55
-login
-exit
-ip domain-name ccnasecurity.com
-username admin secret adminpa55
-line vty 0 4
-login local
-exit
-crypto key generate rsa
-1024
-
-`,
+  import pandas as pd
+import matplotlib.pyplot as plt
+file_path = "AdventureWorks Sales.csv"
+sales = pd.read_csv(file_path)
+print(sales.info())
+print(sales.head())
+plt.figure(figsize=(10,6))
+sales_count = sales.groupby('Channel').count()['SalesOrderLineKey']
+sales_count.plot(kind='bar', color=['skyblue', 'orange', 'green'])
+plt.title('Total Sales Orders by Channel')
+plt.xlabel('Channel')
+plt.ylabel('Number of Orders')
+plt.xticks(rotation=45)
+plt.grid(axis='y', linestyle='--', alpha=0.7)
+plt.show()
+plt.figure(figsize=(8,8))
+sales_count.plot(kind='pie', autopct='%1.1f%%', colors=['lightblue', 'lightgreen', 'lightcoral'])
+plt.title('Sales Order Distribution by Channel')
+plt.ylabel('')
+plt.show()
+  `,
 };
 
 // Route that returns JSON data
