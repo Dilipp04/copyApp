@@ -101,10 +101,10 @@ plt.show()
 
 // Route that returns JSON data
 app.get("/", (req, res) => {
-  res.json(data);
+  res.send(data);
 });
 app.get("/:pno", (req, res) => {
-  res.json(data[req.params.pno]);
+  res.send(data[req.params.pno]);
 });
 
 app.listen(PORT, () => {
