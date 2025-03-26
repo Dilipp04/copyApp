@@ -174,7 +174,108 @@ class second_activity : AppCompatActivity() {
 
   
   `,
-  3: ``,
+  3: `
+  //Activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.358" />
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="409dp"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="47dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+  //AndroidManifest.xml
+<?xml version="1.0" encoding="utf-8"?>
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Practical3"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+  //MainActivity.kt
+  package com.example.practical3
+
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.net.NetworkInfo
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+
+        //Main code
+        val manager  = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = manager.activeNetwork
+        val capabilities = manager.getNetworkCapabilities(network)
+        if (capabilities == null) {
+            Toast.makeText(this, "Offline", Toast.LENGTH_LONG).show()
+        } else if (capabilities.hasTransport(NetworkCapabilities .TRANSPORT_WIFI)) {
+            Toast.makeText(this, "You are connected to WiFi", Toast.LENGTH_LONG).show()
+        } else if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            Toast.makeText(this, "You are connected to Mobile Network", Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(this, "Unknown Network", Toast.LENGTH_LONG).show()
+        }
+
+    }
+}
+  `,
   4: `
   //activity_xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -303,8 +404,204 @@ class MainActivity : AppCompatActivity() {
 
 </manifest>
   `,
-  5: ``,
-  6: ``,
+  5: `
+  //Activity_main.xml
+  <?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hello World!"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+
+  //MainActivity.kt
+  package com.example.practical5
+
+import android.content.pm.PackageManager
+import android.os.Bundle
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+
+class MainActivity : AppCompatActivity() {
+    val RECORD_AUDIO = 1
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        setPermission()
+    }
+
+    private fun setPermission (){
+        val permission = ContextCompat.checkSelfPermission(this,android.Manifest.permission.RECORD_AUDIO)
+
+        if(permission != PackageManager.PERMISSION_GRANTED){
+            if(ActivityCompat.shouldShowRequestPermissionRationale(this,android.Manifest.permission.RECORD_AUDIO)){
+                val builder = AlertDialog.Builder(this)
+                builder.setMessage("Permission required to record audio").setTitle("Permission required").setPositiveButton("OK"){
+                    dialog,which-> giveRequest()
+                }.create().show()
+
+            }else{
+                giveRequest()
+            }
+        }else{
+            Toast.makeText(this,"Permission granted" , Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun giveRequest(){
+        ActivityCompat.requestPermissions(this,arrayOf(android.Manifest.permission.RECORD_AUDIO),RECORD_AUDIO)
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if(requestCode == RECORD_AUDIO){
+            if(grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this,"Permission Denied",Toast.LENGTH_LONG).show()
+            }else{
+                Toast.makeText(this,"Permission granted",Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+}
+
+  //AndroidManifest.xml
+  <?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Practical5"
+        tools:targetApi="31">
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+  `,
+  6: `
+  //activity_main.xml
+  <?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        tools:layout_editor_absoluteX="1dp"
+        tools:layout_editor_absoluteY="5dp" />
+
+</LinearLayout>
+
+  //menu.xml
+  <?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Setting"
+        app:showAsAction="never"
+        android:id="@+id/setting"
+        >
+<menu >
+
+<item android:id="@+id/about"
+    android:title="About"/>
+    <item android:id="@+id/help"
+        android:title="Help"/>
+    <item android:id="@+id/feedback"
+        android:title="Feedback"/>
+</menu>
+    </item>
+</menu>
+
+  //MainActivity.kt
+package com.example.practical6
+
+import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
+
+
+class MainActivity : AppCompatActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        setContentView(R.layout.activity_main)
+        //main code
+        var toolbar : Toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+    }
+//code
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu,menu)
+        return true
+    }
+//code
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when(item.itemId){
+            R.id.about -> Toast.makeText(this,"About",Toast.LENGTH_LONG).show()
+            R.id.help -> Toast.makeText(this,"Help",Toast.LENGTH_LONG).show()
+            R.id.feedback -> Toast.makeText(this,"Feedback",Toast.LENGTH_LONG).show()
+            else-> super.onOptionsItemSelected(item)
+        }
+
+        return true
+    }
+}
+
+  `,
   "7a": `
   //Activity_main.xml
   <?xml version="1.0" encoding="utf-8"?>
@@ -735,6 +1032,172 @@ class fragment1 : Fragment() {
 }
 
 // framgment 1 & fragment 2 are the same !!!
+
+  `,
+  9: `
+  
+//my_dialog.xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat
+     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="40dp"
+        android:background="#B1050B"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:id="@+id/msg"
+            android:textColor="@color/white"
+
+            android:layout_height="wrap_content">
+
+        </TextView>
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/edtname"
+            android:hint="user name"
+            android:textSize="20dp"
+
+            android:textStyle="bold"
+            android:textColor="#F8F6F6"
+            android:layout_height="wrap_content">
+
+        </EditText>
+        <EditText
+            android:layout_width="match_parent"
+            android:id="@+id/edtpass"
+            android:hint="password"
+            android:textSize="20dp"
+
+            android:textStyle="bold"
+            android:textColor="#F8F6F6"
+            android:layout_height="wrap_content">
+        </EditText>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            android:layout_height="wrap_content">
+            <Button
+                android:layout_width="wrap_content"
+                android:id="@+id/login"
+                android:layout_margin="5dp"
+                android:text="login"
+                android:textColor="#F8F6F6"
+                android:layout_height="wrap_content">
+            </Button>
+            <Button
+                android:layout_width="wrap_content"
+                android:id="@+id/cancel"
+                android:layout_margin="5dp"
+                android:text="cancel"
+                android:textColor="#F8F6F6"
+                android:layout_height="wrap_content">
+            </Button>
+        </LinearLayout>
+    </LinearLayout>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
+
+//MyFragment.kt
+
+package com.example.alertdialogfragment
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.DialogFragment
+
+class MyFragment:DialogFragment() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+    }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+      var rootview:View= inflater.inflate(R.layout.my_dialog,container,false)
+        var cancel=rootview.findViewById<Button>(R.id.cancel)
+        var login=rootview.findViewById<Button>(R.id.login)
+        var edtname=rootview.findViewById<EditText>(R.id.edtname)
+        var edtpass=rootview.findViewById<EditText>(R.id.edtpass)
+        var message=rootview.findViewById<TextView>(R.id.msg)
+
+        cancel.setOnClickListener {
+         dismiss()
+
+        }
+        login.setOnClickListener {
+         message.text="hello "+edtname.text.toString()
+
+        }
+
+       return rootview
+    }
+
+}
+
+//activity_main.xml
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="100dp"
+    android:background="#ED0527"
+    tools:context=".MainActivity">
+
+<Button
+    android:layout_width="match_parent"
+    android:id="@+id/callfrag"
+    android:text="call fragment"
+    android:textColor="@color/white"
+    android:layout_height="wrap_content">
+
+</Button>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
+MainActivity.kt
+package com.example.alertdialogfragment
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.widget.Button
+
+class MainActivity : AppCompatActivity() {
+lateinit var call: Button
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+call=findViewById<Button>(R.id.callfrag)
+
+        call.setOnClickListener {
+
+            val fm=supportFragmentManager
+            val myfragment=MyFragment()
+            myfragment.show(fm,"My Login page")
+        }
+
+
+    }
+}
+
 
   `,
 };
